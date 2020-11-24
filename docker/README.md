@@ -188,7 +188,7 @@ docker exec -it ${CONTAINER} bash
 
 ## 常见问题
 
-### 1. 安装完 opencv-python 后运行`cv2.imshaow()`显示缺少相关库
+### 1. 安装完 opencv-python 后运行`cv2.imshow()`显示缺少相关库
 
 ```
 apt-get install libglib2.0-dev
