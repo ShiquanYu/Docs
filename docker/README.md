@@ -34,7 +34,7 @@ docker 功能太多，不胜其扰，写个文档记录下。
 
 1. 如还没有权限请`log out`并重新登录
 
-## 使用
+## 通过镜像创建容器
 
 ### 基础使用方法
 
@@ -101,3 +101,144 @@ docker run --gpus all \
 -it ${docker_image} \
 /bin/bash
 ```
+
+### 容器开启 X11 服务，在宿主机显示画面
+
+开启 X11 服务后就可以显示画面，如摄像头画面或显示图像。
+
+相关参数介绍：
+
+```
+-e DISPLAY=$DISPLAY
+-v /tmp/.X11-unix/:/tmp/.X11-unix/
+```
+
+完整命令：
+
+```shell
+docker run --gpus all \
+--net host \
+--privileged \
+-v /path1:/path1 \
+-v /path2:/path2 \
+--device /dev/video0 \
+-e DISPLAY=$DISPLAY \
+-v /tmp/.X11-unix/:/tmp/.X11-unix/ \
+--name=${container_name} \
+-it ${docker_image} \
+/bin/bash
+```
+
+- **NOTE:** 开启XServer(在docker中开启图形化服务)，必须先在宿主机中运行:`xhost +`
+- **NOTE2:** 若出现错误`X Error: BadShmSeg (invalid shared segment parameter)`或图像显示微灰色，在容器的环境变量中添加:
+
+    ```
+    export QT_X11_NO_MITSHM=1
+    ```
+
+### 容器开启 IPC 通信
+
+某些应用（像分布式计算这种）需要连接外部网络，需要 docker 连接宿主机网络。
+(暂时还不知道为啥非要加这句，总之加了 horovod 就跑起来了)
+
+相关参数介绍：
+
+```
+--ipc=host
+```
+
+完整命令：
+
+```shell
+docker run --gpus all \
+--net host \
+--ipc=host \
+--privileged \
+-v /path1:/path1 \
+-v /path2:/path2 \
+--device /dev/video0 \
+-e DISPLAY=$DISPLAY \
+-v /tmp/.X11-unix/:/tmp/.X11-unix/ \
+--name=${container_name} \
+-it ${docker_image} \
+/bin/bash
+```
+
+## 启动容器
+
+启动容器主要有两种方法，一种是使用`attach`命令，还有一种是使用`exec`命令，
+区别是使用`attach`启动容器退出后容器会自动关闭，`exec`退出后容器仍会运行，
+所以我更倾向于使用后者。
+
+当然，使用`VScode`的 docker 插件就更简单直观多了，VScode yyds！
+
+### `attach`
+
+```shell
+docker start ${CONTAINER}
+docker attach ${CONTAINER}
+```
+
+### `exec`
+
+```shell
+docker start ${CONTAINER}
+docker exec -it ${CONTAINER} bash
+```
+
+## 常见问题
+
+### 1. 安装完 opencv-python 后运行`cv2.imshaow()`显示缺少相关库
+
+```
+apt-get install libglib2.0-dev
+apt-get install libsm6
+apt-get install libxrender1
+apt-get install libxext-dev
+```
+
+### 2. 容器内默认用户都是具有 root 权限的，如何管理用户权限
+
+众所周知，在让普通用户获取了 docker root 权限后，使用 docker 就不用每次都加`sudo`了，
+但是这也引发连另一个问题，进入容器后默认用户为 root ，创建的文件及文件夹对宿主机都是只读状态，
+某些软件(如`mpi/horovod`等)还会提示你不能使用 root 权限执行，同时安全性也有锁降低，那么如何
+在容器内使用普通用户登录且解决以上麻烦呢。
+
+1. 先给容器内 root 账户设置密码，以方便普通用户临时获取 root 权限（如已设置跳过此步骤）
+
+    ```shell
+    passwd ${ROOT}
+    ```
+
+1. 在**容器**内创建用户（用户名最好与宿主机用户名相同）
+
+    ```shell
+    $ adduser ${USER}
+    # 接下来根据提示添加密码啥的
+    ```
+
+1. 查看**宿主机**用户的`gid`和`uid`，一般为四位数
+
+    ```shell
+    $ id ${USER}
+    ```
+
+1. 在**容器**内修改用户的`gid`和`uid`
+
+    ```shell script
+    # 修改uid
+    $ usermod -u ${UID} ${USER}
+    # 修改gid
+    $ groupmod -g ${GID} ${USER}
+    ```
+
+1. 进入普通用户
+
+    ```shell
+    # 若已进入容器，在容器内执行
+    su - ${USER}
+    # 若在宿主机，则在进入容器时添加 --user 参数
+    docker exet -it --user ${USER} ${CONTAINER} bash
+    ```
+
+此时在容器内创建文件或文件夹，在主机中看到即为可读可写状态了，与容器内状态一致。
