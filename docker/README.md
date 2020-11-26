@@ -178,7 +178,7 @@ docker 功能太多，不胜其扰，写个文档记录下。
     --device /dev/video0 \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix/:/tmp/.X11-unix/ \
-    --name=${container_name} \保存/导入镜像/容器
+    --name=${container_name} \
     -it ${docker_image} \
     /bin/bash
     ```
