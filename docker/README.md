@@ -4,13 +4,35 @@ docker 功能太多，不胜其扰，写个文档记录下。
 
 本文档主要针对于 nvidia-docker 的开发环境搭建，基础的 docker 使用详见其[官方文档](https://docs.docker.com/engine/)。
 
+## 目录
+
+[安装 docker/nvidia-docker](#安装-docker/nvidia-docker)
+- [安装过程无法添加 GPG key](安装过程无法添加-GPG-key)
+
+[普通用户获取 docker root 权限](普通用户获取-docker-root-权限)
+
+[通过镜像创建容器](通过镜像创建容器)
+- [基础使用方法](基础使用方法)
+- [挂载主机目录](挂载主机目录)
+- [挂载设备（摄像头、串口等）](挂载设备（摄像头、串口等）)
+- [容器开启 X11 服务，在宿主机显示画面](容器开启-X11-服务，在宿主机显示画面)
+- [容器开启 IPC 通信](容器开启-IPC-通信)
+
+[启动容器](启动容器)
+
+[保存/导入镜像/容器](保存/导入镜像/容器)
+- [保存容器/镜像](保存容器/镜像)
+- [导入镜像](导入镜像)
+
+[常见问题](常见问题)
+
 ## 安装 docker/nvidia-docker
 
 详细安装方法可参考 [nvidia-docker 官方文档](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/overview.html)（打不开搭个梯子），此处仅添加避坑指南。
 
 ### 安装过程无法添加 GPG key
 
-搭梯子，然后进行添加。
+- 搭梯子，然后进行添加。
 
 ## 普通用户获取 docker root 权限
 
@@ -36,98 +58,97 @@ docker 功能太多，不胜其扰，写个文档记录下。
 
 ## 通过镜像创建容器
 
+镜像一般直接去[docker hub](https://hub.docker.com/)搜索下拉即可。
+
 ### 基础使用方法
 
-创建容器：
+- 创建容器：
 
-```shell
-docker run --gpus all \
---net host \
---privileged \
---name=${container_name} \
--it ${docker_image} \
-/bin/bash
-```
+    ```shell
+    docker run --gpus all \
+    --net host \
+    --privileged \
+    --name=${container_name} \
+    -it ${docker_image} \
+    /bin/bash
+    ```
 
 ### 挂载主机目录
 
-挂载后主机和容器可共享目录，实现主机与容器文件交互。
+- 挂载后主机和容器可共享目录，实现主机与容器文件交互。
+- 相关参数介绍：
 
-相关参数介绍：
-
-```
--v ${主机目录}:${docker 中的目录}
-```
+    ```
+    -v ${主机目录}:${docker 中的目录}
+    ```
 
 - **TIPS:** 挂载的`主机目录`最好与`docker 中的目录`相同，方便路径复制。
 - **TIPS2:** （**该操作存在风险，容器内默认有 root 权限，万一误操作 `rm -r /*` 可能引擎灾难性后果，不推荐新手使用。**）可直接在 docker 内挂载主机根目录，然后进入容器使用软链接`ln -s`链接各个文件夹。
 
-完整命令：
+- 完整命令：
 
-```shell
-docker run --gpus all \
---net host \
---privileged \
--v /path1:/path1 \
--v /path2:/path2 \
---name=${container_name} \
--it ${docker_image} \
-/bin/bash
-```
+    ```shell
+    docker run --gpus all \
+    --net host \
+    --privileged \
+    -v /path1:/path1 \
+    -v /path2:/path2 \
+    --name=${container_name} \
+    -it ${docker_image} \
+    /bin/bash
+    ```
 
 ### 挂载设备（摄像头、串口等）
 
-挂载设备后可在容器内访问相关设备。
+- 挂载设备后可在容器内访问相关设备。
+- 相关参数介绍：
 
-相关参数介绍：
-
-```
---device ${设备路径}
-```
+    ```
+    --device ${设备路径}
+    ```
 
 - **TIP:** 该命令也可挂载根目录后使用软链接链接相关设备。
 
-完整命令：
+- 完整命令：
 
-```shell
-# 在容器内挂载摄像头
-docker run --gpus all \
---net host \
---privileged \
--v /path1:/path1 \
--v /path2:/path2 \
---device /dev/video0 \
---name=${container_name} \
--it ${docker_image} \
-/bin/bash
-```
+    ```shell
+    # 在容器内挂载摄像头
+    docker run --gpus all \
+    --net host \
+    --privileged \
+    -v /path1:/path1 \
+    -v /path2:/path2 \
+    --device /dev/video0 \
+    --name=${container_name} \
+    -it ${docker_image} \
+    /bin/bash
+    ```
 
 ### 容器开启 X11 服务，在宿主机显示画面
 
-开启 X11 服务后就可以显示画面，如摄像头画面或显示图像。
+- 开启 X11 服务后就可以显示画面，如摄像头画面或显示图像(暂且还不知道如何将远程服务器上的 docker 画面在本地显示)。
+- 相关参数介绍：
 
-相关参数介绍：
+    ```
+    -e DISPLAY=$DISPLAY
+    -v /tmp/.X11-unix/:/tmp/.X11-unix/
+    ```
 
-```
--e DISPLAY=$DISPLAY
--v /tmp/.X11-unix/:/tmp/.X11-unix/
-```
+- 完整命令：
 
-完整命令：
-
-```shell
-docker run --gpus all \
---net host \
---privileged \
--v /path1:/path1 \
--v /path2:/path2 \
---device /dev/video0 \
--e DISPLAY=$DISPLAY \
--v /tmp/.X11-unix/:/tmp/.X11-unix/ \
---name=${container_name} \
--it ${docker_image} \
-/bin/bash
-```
+    ```shell
+    docker run --gpus all \
+    --net host \
+    --privileged \
+    -v /path1:/path1 \
+    -v /path2:/path2 \
+    --device /dev/video0 \
+    -e DISPLAY=$DISPLAY \
+    -v /tmp/.X11-unix/:/tmp/.X11-unix/ \
+    --name=${container_name} \
+    -it ${docker_image} \
+    /bin/bash
+    ```
 
 - **NOTE:** 开启XServer(在docker中开启图形化服务)，必须先在宿主机中运行:`xhost +`
 - **NOTE2:** 若出现错误`X Error: BadShmSeg (invalid shared segment parameter)`或图像显示微灰色，在容器的环境变量中添加:
@@ -138,31 +159,29 @@ docker run --gpus all \
 
 ### 容器开启 IPC 通信
 
-某些应用（像分布式计算这种）需要连接外部网络，需要 docker 连接宿主机网络。
-(暂时还不知道为啥非要加这句，总之加了 horovod 就跑起来了)
+- 某些应用（像分布式计算这种）需要连接外部网络，需要 docker 连接宿主机网络。(暂时还不知道为啥非要加这句，总之加了 horovod 就跑起来了)
+- 相关参数介绍：
 
-相关参数介绍：
+    ```
+    --ipc=host
+    ```
 
-```
---ipc=host
-```
+- 完整命令：
 
-完整命令：
-
-```shell
-docker run --gpus all \
---net host \
---ipc=host \
---privileged \
--v /path1:/path1 \
--v /path2:/path2 \
---device /dev/video0 \
--e DISPLAY=$DISPLAY \
--v /tmp/.X11-unix/:/tmp/.X11-unix/ \
---name=${container_name} \
--it ${docker_image} \
-/bin/bash
-```
+    ```shell
+    docker run --gpus all \
+    --net host \
+    --ipc=host \
+    --privileged \
+    -v /path1:/path1 \
+    -v /path2:/path2 \
+    --device /dev/video0 \
+    -e DISPLAY=$DISPLAY \
+    -v /tmp/.X11-unix/:/tmp/.X11-unix/ \
+    --name=${container_name} \保存/导入镜像/容器
+    -it ${docker_image} \
+    /bin/bash
+    ```
 
 ## 启动容器
 
@@ -185,6 +204,33 @@ docker attach ${CONTAINER}
 docker start ${CONTAINER}
 docker exec -it ${CONTAINER} bash
 ```
+
+## 保存/导入镜像/容器
+
+此处建议使用 `docker save/load` 命令来保存容器或镜像，使用 `docker export` 命令会出现无法找到显卡驱动的问题，
+不推荐，所以这里不再介绍。
+
+### 保存容器/镜像
+
+- 将容器保存为镜像
+
+    ```shell
+    $ docker commit ${CONTAINER} ${IMAGE}
+    ```
+
+- 保存镜像(以下幸福二选一)
+
+    ```shell
+    $ docker save -o ${SAVE_FILE}.tar ${IMAGE}
+    $ docker save ${IMAGE} > ${SAVE_FILE}.tar
+    ```
+
+### 导入镜像
+
+```shell
+$ docker load ${SAVE_FILE}.tar
+```
+
 
 ## 常见问题
 
