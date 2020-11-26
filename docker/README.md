@@ -287,4 +287,4 @@ apt-get install libxext-dev
     docker exet -it --user ${USER} ${CONTAINER} bash
     ```
 
-此时在容器内创建文件或文件夹，在主机中看到即为可读可写状态了，与容器内状态一致。
+此时在容器内创建文件或文件夹，在宿主机中看到即为可读可写状态了，与容器内状态一致。
