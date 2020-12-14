@@ -69,9 +69,12 @@ docker 功能太多，不胜其扰，写个文档记录下。
     --net host \
     --privileged \
     --name=${container_name} \
+    --hostname=${container_name} \
     -it ${docker_image} \
     /bin/bash
     ```
+
+- *NOTE: `hostname` 和 `name` 最好相同，这样在进入容器终端后就知道自己当前在哪个容器内。*
 
 ### 挂载宿主机目录
 
@@ -94,6 +97,7 @@ docker 功能太多，不胜其扰，写个文档记录下。
     -v /path1:/path1 \
     -v /path2:/path2 \
     --name=${container_name} \
+    --hostname=${container_name} \
     -it ${docker_image} \
     /bin/bash
     ```
@@ -120,6 +124,7 @@ docker 功能太多，不胜其扰，写个文档记录下。
     -v /path2:/path2 \
     --device /dev/video0 \
     --name=${container_name} \
+    --hostname=${container_name} \
     -it ${docker_image} \
     /bin/bash
     ```
@@ -146,6 +151,7 @@ docker 功能太多，不胜其扰，写个文档记录下。
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix/:/tmp/.X11-unix/ \
     --name=${container_name} \
+    --hostname=${container_name} \
     -it ${docker_image} \
     /bin/bash
     ```
@@ -179,6 +185,7 @@ docker 功能太多，不胜其扰，写个文档记录下。
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix/:/tmp/.X11-unix/ \
     --name=${container_name} \
+    --hostname=${container_name} \
     -it ${docker_image} \
     /bin/bash
     ```
