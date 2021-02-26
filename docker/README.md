@@ -234,8 +234,11 @@ docker exec -it ${CONTAINER} bash
 
 ### 导入镜像
 
+- 同样幸福二选一
+
 ```shell
-$ docker load ${SAVE_FILE}.tar
+$ docker load --input ${SAVE_FILE}.tar
+$ docker load < ${SAVE_FILE}.tar
 ```
 
 
