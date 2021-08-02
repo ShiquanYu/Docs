@@ -1,4 +1,4 @@
-# 这可能是史上最全的 (ubuntu)docker 开发环境搭建教程
+# docker(ubuntu) 开发环境搭建教程
 
 docker 功能太多，不胜其扰，写个文档记录下。
 
