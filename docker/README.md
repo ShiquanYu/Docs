@@ -47,14 +47,16 @@ docker 功能太多，不胜其扰，写个文档记录下。
     ```shell
     sudo gpasswd -a ${USER} docker
     ```
+    
+1. `log out`并重新登录
 
+<!-- 
 1. 重启docker服务
 
     ```shell
     sudo systemctl restart docker
-    ```
+    ``` -->
 
-1. 如还没有权限请`log out`并重新登录
 
 ## 通过镜像创建容器
 
