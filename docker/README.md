@@ -268,26 +268,17 @@ apt-get install libxext-dev
     passwd ${ROOT}
     ```
 
-1. 在**容器**内创建用户（用户名最好与宿主机用户名相同）
-
-    ```shell
-    $ adduser ${USER}
-    # 接下来根据提示添加密码啥的
-    ```
-
 1. 查看**宿主机**用户的`gid`和`uid`，一般为四位数
 
     ```shell
     $ id ${USER}
     ```
 
-1. 在**容器**内修改用户的`gid`和`uid`
+1. 在**容器**内创建用户（用户名最好与宿主机用户名相同）
 
-    ```shell script
-    # 修改uid
-    $ usermod -u ${UID} ${USER}
-    # 修改gid
-    $ groupmod -g ${GID} ${USER}
+    ```shell
+    $ adduser -u ${host_id} ${USER}
+    # 接下来根据提示添加密码啥的
     ```
 
 1. 进入普通用户
