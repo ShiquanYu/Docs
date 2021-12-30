@@ -275,7 +275,7 @@ $ docker load < ${SAVE_FILE}.tar
 
     ```bash
     $ sudo systemctl daemon-reload
-    $ sudo systemctl start docker
+    $ sudo systemctl start docker.service
     ```
 
 5. 使用 `docker info` 命令查看路径是否被更改
