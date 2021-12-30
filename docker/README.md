@@ -24,6 +24,10 @@ docker 功能太多，不胜其扰，写个文档记录下。
 - [保存容器/镜像](#保存容器镜像)
 - [导入镜像](#导入镜像)
 
+[更换 docker 默认存储路径](#更换-docker-默认存储路径)
+
+[更换 docker 阿里源](#更换-docker-阿里源)
+
 [常见问题](#常见问题)
 
 ## 安装 docker/nvidia-docker
@@ -241,6 +245,49 @@ docker exec -it ${CONTAINER} bash
 ```shell
 $ docker load --input ${SAVE_FILE}.tar
 $ docker load < ${SAVE_FILE}.tar
+```
+
+## 更换 docker 默认存储路径
+
+众所周知 docker 的默认存储路径在 `/var/lib/dcoker` 系统盘路径下（可通过 `docker onfo` 指令查看），
+非常占空间，可通过重新配置路径将默认存储路径移动至其他位置以防系统盘满载出问题。
+
+1. 关闭 docker service
+
+    ```bash
+    $ sudo service docker stop
+    ```
+2. 将 `/var/lib/dcoker` 移动至其他位置
+
+    ```bash
+    $ mv /var/lib/dcoker $新的位置
+    ```
+
+3. 修改配置文件 `/etc/docker/daemon.json`，添加一条新配置并保存：
+
+    ```json
+    {
+      "data-root": "$新的 docker 存储位置"
+    }
+    ```
+
+4. 重新加载，开启 docker service
+
+    ```bash
+    $ sudo systemctl daemon-reload
+    $ sudo systemctl start docker
+    ```
+
+5. 使用 `docker info` 命令查看路径是否被更改
+
+## 更换 docker 阿里源
+
+- 在 `/etc/docker/daemon.json` 里添加一条配置：
+
+```json
+{
+    "registry-mirrors": ["https://m1sb0hoj.mirror.aliyuncs.com"]
+}
 ```
 
 
