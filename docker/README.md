@@ -249,7 +249,7 @@ $ docker load < ${SAVE_FILE}.tar
 
 ## 更换 docker 默认存储路径
 
-众所周知 docker 的默认存储路径在 `/var/lib/dcoker` 系统盘路径下（可通过 `docker onfo` 指令查看），
+众所周知 docker 的默认存储路径在 `/var/lib/dcoker` 系统盘路径下（可通过 `docker info` 指令查看），
 非常占空间，可通过重新配置路径将默认存储路径移动至其他位置以防系统盘满载出问题。
 
 1. 关闭 docker service
